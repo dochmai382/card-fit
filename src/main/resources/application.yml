@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: card-fit
+  profiles:
+    active: dev

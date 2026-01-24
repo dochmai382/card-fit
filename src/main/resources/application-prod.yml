@@ -1,0 +1,23 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none # 배포 시는 none 또는 validate 추천
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: false
+        format_sql: false
+  # 데이터소스
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  servlet:
+    multipart: # 엑셀 업로드를 위한 설정
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+gemini:
+  api:
+    key: ${GOOGLE_GEMINI_KEY}
