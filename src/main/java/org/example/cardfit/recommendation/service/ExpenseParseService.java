@@ -1,7 +1,6 @@
 package org.example.cardfit.recommendation.service;
 
 import lombok.RequiredArgsConstructor;
-import org.example.cardfit.domain.category.CategoryType;
 import org.example.cardfit.infrastructure.excel.PoiExcelParser;
 import org.example.cardfit.infrastructure.llm.LLMClient;
 import org.example.cardfit.recommendation.dto.ExpenseMappingResult;
@@ -11,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +47,8 @@ public class ExpenseParseService {
         String jsonResult = llmClient.classify(stores);
 
         try {
-            List<Map<String, Object>> list = objectMapper.readValue(jsonResult, new TypeReference<>(){});
+            List<Map<String, Object>> list = objectMapper.readValue(jsonResult, new TypeReference<>() {
+            });
             return list.stream().collect(Collectors.toMap(
                     m -> (String) m.get("storeName"),
                     m -> Long.valueOf(m.get("categoryId").toString()),

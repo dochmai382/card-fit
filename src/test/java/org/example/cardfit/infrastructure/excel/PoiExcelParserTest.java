@@ -4,21 +4,36 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.assertj.core.api.Assertions;
 import org.example.cardfit.recommendation.dto.RawExpense;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.mock.web.MockMultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.time.LocalDate;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 class PoiExcelParserTest {
 
-    private final PoiExcelParser parser = new PoiExcelParser();
+    @Mock
+    private HeaderDetector headerDetector;
+
+    private PoiExcelParser parser;
+
+    @BeforeEach
+    void setUp() {
+        MockitoAnnotations.openMocks(this);
+        parser = new PoiExcelParser(headerDetector);
+
+        when(headerDetector.detect(any())).thenReturn(new ColumnMapping(0, 1, 2, -1));
+    }
 
     @Test
     @DisplayName("엑셀 파일을 업로드하면 RawExpense 리스트로 정확히 변환되어야 한다")
