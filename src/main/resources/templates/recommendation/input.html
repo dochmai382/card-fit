@@ -13,20 +13,20 @@
         <div class="card p-3 mb-4">
             <h5>엑셀로 데이터 불러오기</h5>
             <input type="file" id="excelFile" class="form-control">
-            <button type="button" class="btn btn-secondary mt-2" onclick="analyzeExcel()">분석하기</button>
+            <button type="button" id="analyzeBtn" class="btn btn-secondary mt-2" onclick="analyzeExcel()" disabled>분석하기</button>
         </div>
 
         <form th:action="@{/recommendation/result}" method="POST" id="mainForm">
             <div class="mb-3">
                 <label>예상 전월 실적: </label>
-                <input type="number" name="expectedPerformance" id="expectedPerformance" class="form-control" value="0">
+                <input type="text" inputmode="numeric" name="expectedPerformance" id="expectedPerformance" class="form-control" value="0">
             </div>
 
             <div th:each="cat, stat : ${categories}" class="mb-2 row">
                 <div class="col-4" th:text="${cat.name}">식비</div>
                 <div class="col-8">
                     <input type="hidden" th:name="|items[${stat.index}].categoryId|" th:value="${cat.id}">
-                    <input type="number" th:name="|items[${stat.index}].amount|" th:id="'amount-' + ${cat.id}"
+                    <input type="text" inputmode="numeric" th:name="|items[${stat.index}].amount|" th:id="'amount-' + ${cat.id}"
                            class="form-control category-input" value="0">
                 </div>
             </div>
