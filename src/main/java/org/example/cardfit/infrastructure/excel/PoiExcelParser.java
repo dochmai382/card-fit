@@ -17,6 +17,7 @@ import java.util.List;
 public class PoiExcelParser implements ExcelParser{
 
     private final HeaderDetector headerDetector;
+    private static final List<String> EXPENSE_KEYWORDS = List.of("지출", "지급", "사용", "결제", "expense", "out");
 
     @Override
     public List<RawExpense> parse(MultipartFile file) {
@@ -35,9 +36,18 @@ public class PoiExcelParser implements ExcelParser{
                 Row row = sheet.getRow(i);
                 if (row == null || isRowEmpty(row)) continue;
 
+                double rawAmount = getNumericValue(row.getCell(mapping.amountIndex()));
+
+                if (mapping.typeIndex() >= 0) {
+                    String type = getStringValue(row.getCell(mapping.typeIndex()));
+                    if(!isExpense(type)) continue;
+                } else {
+                    if (rawAmount >= 0) continue;
+                }
+
                 LocalDate date = getLocalDate(row.getCell(mapping.dateIndex()));
                 String storeName = getStringValue(row.getCell(mapping.storeNameIndex()));
-                long amount = (long) getNumericValue(row.getCell(mapping.amountIndex()));
+                long amount = (long) Math.abs(rawAmount);
 
                 expenses.add(new RawExpense(date, storeName, amount));
             }
@@ -54,6 +64,11 @@ public class PoiExcelParser implements ExcelParser{
             if (cell != null && cell.getCellType() != CellType.BLANK) return false;
         }
         return true;
+     }
+
+     private boolean isExpense(String type) {
+         String lower = type.toLowerCase();
+         return EXPENSE_KEYWORDS.stream().anyMatch(lower::contains);
      }
 
     private LocalDate getLocalDate(Cell cell) {

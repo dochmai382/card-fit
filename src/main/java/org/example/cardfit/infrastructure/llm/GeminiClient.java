@@ -128,9 +128,10 @@ public class GeminiClient implements LLMClient {
                 - dateIndex: 날짜/일자/이용일 등 날짜 관련 열의 인덱스 (0부터 시작)
                 - storeNameIndex: 가맹점/상호/거래처/내역 등 가맹점명 및 내역 관련 열의 인덱스
                 - amountIndex: 금액/결제/승인금액 등 금액 관련 열의 인덱스
+                - typeIndex: 수입/지출 구분 열의 인덱스
                 
                 [출력 형식]
-                {"dateIndex": 0, "storeNameIndex": 1, "amountIndex": 2}
+                {"dateIndex": 0, "storeNameIndex": 1, "amountIndex": 2, "typeIndex": 3}
                 
                 [주의]
                 - 인덱스는 0부터 시작
@@ -145,8 +146,9 @@ public class GeminiClient implements LLMClient {
             int dateIndex = node.path("dateIndex").asInt(-1);
             int storeNameIndex = node.path("storeNameIndex").asInt(-1);
             int amountIndex = node.path("amountIndex").asInt(-1);
+            int typeIndex = node.path("typeIndex").asInt(-1);
 
-            return new ColumnMapping(dateIndex, storeNameIndex, amountIndex);
+            return new ColumnMapping(dateIndex, storeNameIndex, amountIndex, typeIndex);
         } catch (Exception e) {
             throw new RuntimeException("헤더 감지 응답 파싱 실패: " + e.getMessage());
         }

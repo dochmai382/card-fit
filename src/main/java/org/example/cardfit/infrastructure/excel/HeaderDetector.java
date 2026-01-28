@@ -14,14 +14,16 @@ public class HeaderDetector {
     private static final List<String> DATE_KEYWORDS = List.of("날짜", "일자", "이용일", "사용일", "거래일", "date");
     private static final List<String> STORE_KEYWORDS = List.of("가맹점", "상호", "거래처", "내역", "사용처", "store");
     private static final List<String> AMOUNT_KEYWORDS = List.of("금액", "결제", "승인", "이용금액", "amount");
+    private static final List<String> TYPE_KEYWORDS = List.of("수입", "지출", "구분", "유형", "입출금", "type");
 
     public ColumnMapping detect(List<String> headers) {
         int dateIdx = findByKeywords(headers, DATE_KEYWORDS);
         int storeIdx = findByKeywords(headers, STORE_KEYWORDS);
         int amountIdx = findByKeywords(headers, AMOUNT_KEYWORDS);
+        int typeIdx = findByKeywords(headers, TYPE_KEYWORDS);
 
         if (dateIdx >= 0 && storeIdx >= 0 && amountIdx >= 0) {
-            return new ColumnMapping(dateIdx, storeIdx, amountIdx);
+            return new ColumnMapping(dateIdx, storeIdx, amountIdx, typeIdx);
         }
 
         return detectByLLM(headers);
