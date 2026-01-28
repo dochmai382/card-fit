@@ -20,8 +20,7 @@ function renderMappingModal() {
 
     rawAnalysisResults.forEach((item, index) => {
         const categoryOptions = CATEGORIES.map(cat => {
-            const selected = item.categoryType === cat.toString() ? 'selected'
-                : '';
+            const selected = item.categoryId === cat.id ? 'selected' : '';
             return `<option value="${cat.id}" ${selected}>${cat.name}</option>`;
         }).join('');
         body.innerHTML += `

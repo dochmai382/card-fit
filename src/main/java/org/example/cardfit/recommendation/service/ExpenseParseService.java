@@ -40,7 +40,7 @@ public class ExpenseParseService {
                         raw.storeName(),
                         Long.valueOf(raw.amount().toString()),
                         raw.date().toString(),
-                        findCategory(categoryMap.get(raw.storeName()))
+                        categoryMap.getOrDefault(raw.storeName(), 0L)
                 ))
                 .toList();
     }
@@ -58,12 +58,5 @@ public class ExpenseParseService {
         } catch (Exception e) {
             return Collections.emptyMap();
         }
-    }
-
-    private CategoryType findCategory(Long id) {
-        return Arrays.stream(CategoryType.values())
-                .filter(c -> c.getId().equals(id))
-                .findFirst()
-                .orElse(CategoryType.ETC);
     }
 }

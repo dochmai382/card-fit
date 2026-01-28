@@ -1,6 +1,7 @@
 package org.example.cardfit.infrastructure.llm;
 
 import org.example.cardfit.domain.category.CategoryType;
+import org.example.cardfit.infrastructure.excel.ColumnMapping;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -29,10 +30,9 @@ public class GeminiClient implements LLMClient {
         this.objectMapper = objectMapper;
     }
 
-    @Override
-    public String classify(List<String> storeNames) {
-        String prompt = createPrompt(storeNames);
+    private String callGeminiApi(String prompt) {
         String urlWithKey = apiUrl + "?key=" + apiKey;
+
         Map<String, Object> requestBody = Map.of(
                 "contents", List.of(
                         Map.of("parts", List.of(Map.of("text", prompt)))
@@ -49,6 +49,13 @@ public class GeminiClient implements LLMClient {
                 .body(String.class);
 
         return extractTextFromResponse(rawResponse);
+    }
+
+
+    @Override
+    public String classify(List<String> storeNames) {
+        String prompt = createPrompt(storeNames);
+        return callGeminiApi(prompt);
     }
 
     private String extractTextFromResponse(String rawResponse) {
@@ -98,5 +105,50 @@ public class GeminiClient implements LLMClient {
                 %s
                 
                 """, categoryGuide, stores);
+    }
+
+    @Override
+    public ColumnMapping detectColumns(List<String> headers) {
+        String prompt = createHeaderDetectPrompt(headers);
+        String jsonText = callGeminiApi(prompt);
+        return parseColumnMapping(jsonText);
+    }
+
+    private String createHeaderDetectPrompt(List<String> headers) {
+        String headerList = String.join(",", headers);
+
+        return String.format("""
+                너는 엑셀 헤더를 분석하는 데이터 처리 봇이야.
+                설명은 생략하고 오직 JSON 데이터만 출력해.
+                
+                [분석 대상 헤더 목록]
+                %s
+                
+                [분석 규칙]
+                - dateIndex: 날짜/일자/이용일 등 날짜 관련 열의 인덱스 (0부터 시작)
+                - storeNameIndex: 가맹점/상호/거래처/내역 등 가맹점명 및 내역 관련 열의 인덱스
+                - amountIndex: 금액/결제/승인금액 등 금액 관련 열의 인덱스
+                
+                [출력 형식]
+                {"dateIndex": 0, "storeNameIndex": 1, "amountIndex": 2}
+                
+                [주의]
+                - 인덱스는 0부터 시작
+                - 해당 열을 찾을 수 없으면 -1 반환
+                """, headerList);
+    }
+
+    private ColumnMapping parseColumnMapping(String jsonText) {
+        try {
+            JsonNode node = objectMapper.readTree(jsonText);
+
+            int dateIndex = node.path("dateIndex").asInt(-1);
+            int storeNameIndex = node.path("storeNameIndex").asInt(-1);
+            int amountIndex = node.path("amountIndex").asInt(-1);
+
+            return new ColumnMapping(dateIndex, storeNameIndex, amountIndex);
+        } catch (Exception e) {
+            throw new RuntimeException("헤더 감지 응답 파싱 실패: " + e.getMessage());
+        }
     }
 }
