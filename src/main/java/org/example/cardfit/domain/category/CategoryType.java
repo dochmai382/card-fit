@@ -18,6 +18,7 @@ public enum CategoryType {
     CULTURE_SUBSCRIPTION(7L, "문화/구독"),
     MEDICAL(8L, "의료/병원"),
     EDUCATION(9L, "교육/학원"),
+    UTILITIES(10L, "공과금/생활비"),
     ETC(0L, "기타");
 
     private final Long id;
