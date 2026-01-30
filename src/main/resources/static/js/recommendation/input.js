@@ -21,8 +21,12 @@ async function analyzeExcel() {
             method: 'POST',
             body: formData
         });
-        rawAnalysisResults = await response.json();
 
+        if (!response.ok) {
+            throw new Error('서버 오류가 발생했습니다.');
+        }
+
+        rawAnalysisResults = await response.json();
         renderMappingModal();
     } catch (error) {
         alert('분석 중 오류가 발생했습니다.');
@@ -37,21 +41,34 @@ function renderMappingModal() {
     body.innerHTML = '';
 
     rawAnalysisResults.forEach((item, index) => {
-        const categoryOptions = CATEGORIES.map(cat => {
-            const selected = item.categoryId === cat.id ? 'selected' : '';
-            return `<option value="${cat.id}" ${selected}>${cat.name}</option>`;
-        }).join('');
-        body.innerHTML += `
-            <tr>
-                  <td>${item.storeName}</td>
-                  <td>${item.amount.toLocaleString()}원</td>
-                  <td>
-                      <select class="form-select mapping-select"  data-amount="${item.amount}">
-                          ${categoryOptions}
-                      </select>
-                  </td>
-              </tr>`;
+        const tr = document.createElement('tr');
+
+        const tdStore = document.createElement('td');
+        tdStore.textContent = item.storeName;
+        tr.appendChild(tdStore);
+
+        const tdAmount = document.createElement('td');
+        tdAmount.textContent = item.amount.toLocaleString() + '원';
+        tr.appendChild(tdAmount);
+
+        const tdCategory = document.createElement('td');
+        const select = document.createElement('select');
+        select.className = 'form-select mapping-select';
+        select.dataset.amount = item.amount;
+
+        CATEGORIES.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.id;
+            option.textContent = cat.name;
+            if (item.categoryId === cat.id) option.selected = true;
+            select.appendChild(option);
+        });
+
+        tdCategory.appendChild(select);
+        tr.appendChild(tdCategory);
+        body.appendChild(tr);
     });
+
     document.getElementById('mappingModal').style.display = 'block';
 }
 

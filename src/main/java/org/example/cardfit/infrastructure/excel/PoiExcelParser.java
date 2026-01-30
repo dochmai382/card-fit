@@ -27,6 +27,8 @@ public class PoiExcelParser implements ExcelParser{
             Sheet sheet = workbook.getSheetAt(0);
 
             Row headerRow = sheet.getRow(0);
+            if (headerRow == null) throw new RuntimeException("엑셀 파일에 헤더 행이 없습니다");
+
             List<String> headers = extractHeaders(headerRow);
 
             ColumnMapping mapping = headerDetector.detect(headers);

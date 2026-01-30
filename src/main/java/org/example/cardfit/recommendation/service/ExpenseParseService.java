@@ -24,6 +24,8 @@ public class ExpenseParseService {
     private final ObjectMapper objectMapper;
 
     public List<ExpenseMappingResult> parseAndClassify(MultipartFile file) {
+        validateFile(file);
+
         var rawExpenses = excelParser.parse(file);
 
         List<String> distinctStores = rawExpenses.stream()
@@ -41,6 +43,14 @@ public class ExpenseParseService {
                         categoryMap.getOrDefault(raw.storeName(), 0L)
                 ))
                 .toList();
+    }
+
+    private void validateFile(MultipartFile file) {
+        if (file == null || file.isEmpty()) throw new IllegalArgumentException("파일이 비어있습니다");
+
+        String filename = file.getOriginalFilename();
+        if (filename == null || (!filename.endsWith(".xlsx") && !filename.endsWith(".xls")))
+            throw new IllegalArgumentException("엑셀 파일(.xlsx, .xls)만 업로드 가능합니다.");
     }
 
     private Map<String, Long> classifyStores(List<String> stores) {

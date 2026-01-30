@@ -24,9 +24,11 @@ public enum CategoryType {
     private final Long id;
     private final String name;
 
+    private static final String PROMPT_GUIDE = Arrays.stream(values())
+            .map(c -> c.id + ":" + c.name)
+            .collect(Collectors.joining(", "));
+
     public static String getPromptGuide() {
-        return Arrays.stream(values())
-                .map(c -> c.id + ":" + c.name)
-                .collect(Collectors.joining(", "));
+        return PROMPT_GUIDE;
     }
 }

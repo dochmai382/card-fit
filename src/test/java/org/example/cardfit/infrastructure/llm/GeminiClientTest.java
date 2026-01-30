@@ -1,7 +1,9 @@
 package org.example.cardfit.infrastructure.llm;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +26,11 @@ class GeminiClientTest {
 
     @Test
     @DisplayName("실제 Gemini API가 정해진 카테고리 ID로 JSON 응답을 주는지 확인")
-    void realApiTest() {
+    @Tag("integration")
+    void realApiTest() throws Exception {
+        Assumptions.assumeTrue(System.getenv("GEMINI_API_KEY") != null,
+                "GEMINI_API_KEY not set");
+
         // given
         List<String> stores = List.of("스타벅스 성수점", "배민", "GS25 강남점", "아아");
 

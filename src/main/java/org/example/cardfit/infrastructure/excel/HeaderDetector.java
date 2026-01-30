@@ -22,11 +22,21 @@ public class HeaderDetector {
         int amountIdx = findByKeywords(headers, AMOUNT_KEYWORDS);
         int typeIdx = findByKeywords(headers, TYPE_KEYWORDS);
 
+        ColumnMapping mapping;
         if (dateIdx >= 0 && storeIdx >= 0 && amountIdx >= 0) {
-            return new ColumnMapping(dateIdx, storeIdx, amountIdx, typeIdx);
+            mapping = new ColumnMapping(dateIdx, storeIdx, amountIdx, typeIdx);
+        } else {
+            mapping = detectByLLM(headers);
         }
 
-        return detectByLLM(headers);
+        validateMapping(mapping);
+        return mapping;
+    }
+
+    private void validateMapping(ColumnMapping mapping) {
+        if (mapping.dateIndex() < 0 || mapping.storeNameIndex() < 0 || mapping.amountIndex() < 0) {
+            throw new IllegalArgumentException("필수 열(날짜, 가맹점/내역, 금액)을 찾을 수 없습니다.");
+        }
     }
 
     private int findByKeywords(List<String> headers, List<String> keywords) {
