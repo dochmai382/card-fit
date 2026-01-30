@@ -73,13 +73,19 @@ function renderMappingModal() {
 }
 
 function applyToManualForm() {
+    document.querySelectorAll('.category-input').forEach(input => {
+        input.value = formatNumber(0);
+    })
+    document.getElementById('expectedPerformance').value = formatNumber(0);
+
     const selects = document.querySelectorAll('.mapping-select');
     const totals = {};
     let totalPerformance = 0;
 
     selects.forEach(select => {
         const catId = select.value;
-        const amount = parseInt(select.dataset.amount);
+        const amount = Number(select.dataset.amount);
+        if (Number.isNaN(amount)) return;
 
         totals[catId] = (totals[catId] || 0) + amount;
         totalPerformance += amount;

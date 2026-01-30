@@ -49,7 +49,10 @@ public class ExpenseParseService {
         if (file == null || file.isEmpty()) throw new IllegalArgumentException("파일이 비어있습니다");
 
         String filename = file.getOriginalFilename();
-        if (filename == null || (!filename.endsWith(".xlsx") && !filename.endsWith(".xls")))
+        if (filename == null) throw new IllegalArgumentException("파일명이 없습니다.");
+
+        String lower = filename.toLowerCase();
+        if (!lower.endsWith(".xlsx") && !lower.endsWith(".xls"))
             throw new IllegalArgumentException("엑셀 파일(.xlsx, .xls)만 업로드 가능합니다.");
     }
 
