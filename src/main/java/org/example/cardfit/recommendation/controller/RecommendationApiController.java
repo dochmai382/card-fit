@@ -1,12 +1,12 @@
 package org.example.cardfit.recommendation.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.cardfit.recommendation.dto.RecommendationResponse;
-import org.example.cardfit.recommendation.form.ManualInputForm;
-import org.example.cardfit.recommendation.mapper.RecommendationMapper;
+import org.example.cardfit.recommendation.dto.ExpenseMappingResult;
+import org.example.cardfit.recommendation.form.ExcelUploadForm;
+import org.example.cardfit.recommendation.service.ExpenseParseService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,15 +17,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RecommendationApiController {
 
-    private final RecommendationMapper recommendationMapper;
+    private final ExpenseParseService expenseParseService;
 
-    @PostMapping("/manual")
-    public ResponseEntity<RecommendationResponse> getManualRecommendation(@RequestBody ManualInputForm form) {
-        var requests = recommendationMapper.toSummaryRequest(form);
-        System.out.println("가공된 데이터 개수: " + requests.size());
-
-        return ResponseEntity.ok(new RecommendationResponse(
-                "테스트카드", 0, List.of(), "엔진 구현 중", 0
-        ));
+    @PostMapping("/upload")
+    public ResponseEntity<List<ExpenseMappingResult>> uploadExcel(@ModelAttribute ExcelUploadForm form) {
+        List<ExpenseMappingResult> results = expenseParseService.parseAndClassify(form.file());
+        return ResponseEntity.ok(results);
     }
 }
