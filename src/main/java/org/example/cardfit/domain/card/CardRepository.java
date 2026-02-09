@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface CardRepository extends JpaRepository<Card, Long> {
-    List<Card> findAllByStatus(CardStatus status);
+    List<Card> findByStatus(CardStatus status);
 }
