@@ -19,6 +19,9 @@ public enum CategoryType {
     MEDICAL(8L, "의료/병원"),
     EDUCATION(9L, "교육/학원"),
     UTILITIES(10L, "공과금/생활비"),
+    TRAVEL(11L, "해외/여행"),
+    MILEAGE(12L, "항공마일리지"),
+    TELECOM(13L, "통신"),
     ETC(0L, "기타");
 
     private final Long id;
