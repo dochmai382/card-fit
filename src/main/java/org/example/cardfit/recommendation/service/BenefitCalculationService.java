@@ -35,7 +35,7 @@ public class BenefitCalculationService {
 
     private long calculateDiscount(Benefit benefit, ExpenseSummaryRequest expense) {
         if (benefit.getDiscountType() == DiscountType.RATE) {
-            return (long) (expense.monthlyAmount() * benefit.getDiscountValue() / 100);
+            return Math.round(expense.monthlyAmount() * benefit.getDiscountValue() / 100);
         } else {
             return benefit.getDiscountValue().longValue();
         }

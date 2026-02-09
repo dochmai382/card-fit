@@ -24,6 +24,13 @@ public class RecommendationService {
 
     private static final int TOP_COUNT = 3;
 
+    private static final Comparator<CardRecommendation> RECOMMENDATION_COMPARATOR = Comparator
+                    .comparingLong(CardRecommendation::score).reversed()
+                    .thenComparing(Comparator.comparingLong(CardRecommendation::benefitAmount).reversed())
+                    .thenComparingInt(r -> r.card().getAnnualFee() != null ? r.card().getAnnualFee() : 0)
+                    .thenComparing(r -> r.card().getCardType() == CardType.CHECK ? 0 : 1);
+
+
     public List<CardRecommendation> recommend(List<ExpenseSummaryRequest> expenses, Long userPerformance) {
         List<Long> topCategories = categorySelectionPolicy.selectTopCategories(expenses);
         List<Card> activeCards = cardRepository.findByStatus(CardStatus.ACTIVE);
@@ -31,13 +38,14 @@ public class RecommendationService {
         return activeCards.stream()
                 .filter(card -> meetsPerformance(card, userPerformance))
                 .map(card -> calculateCardScore(card, expenses, topCategories))
-                .sorted(getRecommendationComparator())
+                .sorted(RECOMMENDATION_COMPARATOR)
                 .limit(TOP_COUNT)
                 .toList();
     }
 
     private boolean meetsPerformance(Card card, Long userPerformance) {
         if (card.getMinPerformance() == null) return true;
+        if (userPerformance == null) return false;
         return userPerformance >= card.getMinPerformance();
     }
 
@@ -68,14 +76,6 @@ public class RecommendationService {
         return expenses.stream()
                 .mapToLong(expense -> benefitCalculationService.calculateBenefit(benefit, expense))
                 .sum();
-    }
-
-    private Comparator<CardRecommendation> getRecommendationComparator() {
-        return Comparator
-                .comparingLong(CardRecommendation::score).reversed()
-                .thenComparing(Comparator.comparingLong(CardRecommendation::benefitAmount).reversed())
-                .thenComparingInt(r -> r.card().getAnnualFee() != null ? r.card().getAnnualFee() : 0)
-                .thenComparing(r -> r.card().getCardType() == CardType.CHECK ? 0 : 1);
     }
 
     public record CardRecommendation(Card card, long benefitAmount, long score){}

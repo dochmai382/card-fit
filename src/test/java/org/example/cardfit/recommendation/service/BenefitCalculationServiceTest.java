@@ -104,4 +104,24 @@ class BenefitCalculationServiceTest {
         // then
         assertThat(discount).isEqualTo(5000);
     }
+
+    @Test
+    @DisplayName("정액 할인이 정상 계산된다")
+    void amountDiscount_calculatesCorrectly() {
+        // given
+        Category category = createCategory(1L);
+        Benefit benefit = Benefit.builder()
+                .category(category)
+                .discountType(DiscountType.AMOUNT)
+                .discountValue(5000.0)
+                .monthlyLimit(null)
+                .build();
+        ExpenseSummaryRequest expense = new ExpenseSummaryRequest(1L, 100000L);
+
+        // when
+        long discount = service.calculateBenefit(benefit, expense);
+
+        // then
+        assertThat(discount).isEqualTo(5000);
+    }
 }

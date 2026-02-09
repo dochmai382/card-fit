@@ -14,7 +14,7 @@ public class CategorySelectionPolicy {
 
     /**
      * 주요 소비 카테고리 선정
-     * @param expenses 지출들
+     * @param expenses 카테고리별로 이미 합산된 지출 목록
      * @return 상위 3개 카테고리 ID
      */
     public List<Long> selectTopCategories(List<ExpenseSummaryRequest> expenses) {

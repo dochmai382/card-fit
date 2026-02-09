@@ -99,7 +99,7 @@ class RecommendationServiceTest {
 
         // 혜택1: 10%할인, 한도 없음, priority 1 -> 10만원의 10% -> 10,000원
         // 혜택2: 10%할인, 한도 없음, priority 2 -> 10만원의 10% -> 10,000원
-        // 톱합 한도: 12,000원
+        // 통합 한도: 12,000원
         Card card = createCard(12000, null, List.of(
                 createBenefit(category1, DiscountType.RATE, 10.0, null, 1),
                 createBenefit(category2, DiscountType.RATE, 10.0, null, 2)
@@ -144,7 +144,7 @@ class RecommendationServiceTest {
     @Test
     @DisplayName("TOP3 카드가 점수 순으로 정렬된다")
     void recommend_returnsTop3ByScore() {
-        // give
+        // given
         Category category = createCategory(1L);
         // 카드 3개
         Card cardA = createCardWithName("카드A", null, null, 0, CardType.CREDIT, List.of(createBenefit(category, DiscountType.RATE, 5.0, null, 1))); // 5%
