@@ -1,0 +1,40 @@
+.card-item {
+    display: flex;
+    gap: 20px;
+}
+
+.card-image {
+    width: 120px;
+    height: 76px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #f0f0f0;
+}
+
+.card-info {
+    flex: 1;
+}
+
+.benefit-amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+.rank {
+    width: 32px;
+    height: 32px;
+    background: #2563eb;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.explanation {
+    background: #f8f9fa;
+    border-radius: 8px;
+}

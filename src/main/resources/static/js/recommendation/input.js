@@ -130,9 +130,45 @@ document.querySelectorAll('.category-input, #expectedPerformance').forEach(input
     });
 });
 
-document.getElementById('mainForm').addEventListener('submit', function() {
-    this.querySelectorAll('.category-input, #expectedPerformance').forEach(input => {
-        input.value = unformatNumber(input.value);
-    });
+document.getElementById('mainForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const submitBtn = this.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '분석 중...';
+
+    try {
+        const items = [];
+        this.querySelectorAll('.category-input').forEach(input => {
+            const hiddenInput = input.previousElementSibling;
+            if (hiddenInput && input.value) {
+                items.push({
+                    categoryId: Number(hiddenInput.value),
+                    amount: Number(unformatNumber(input.value))
+                });
+            }
+        });
+
+        const expectedPerformance = Number(unformatNumber(document.getElementById('expectedPerformance').value));
+
+        const response = await fetch('/api/recommendation/recommend', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ items, expectedPerformance })
+        });
+
+        if (!response.ok) {
+            throw new Error('추천 분석에 실패했습니다.');
+        }
+
+        const recommendations = await response.json();
+
+        sessionStorage.setItem('recommendations', JSON.stringify(recommendations));
+        window.location.href = '/recommendation/result';
+    } catch (error) {
+        alert(error.message || '오류가 발생했습니다.');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '추천 카드 분석';
+    }
 });
 
