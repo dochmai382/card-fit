@@ -6,6 +6,7 @@ import org.example.cardfit.domain.card.Card;
 import org.example.cardfit.domain.card.CardRepository;
 import org.example.cardfit.domain.card.CardStatus;
 import org.example.cardfit.domain.card.CardType;
+import org.example.cardfit.recommendation.dto.CardRecommendation;
 import org.example.cardfit.recommendation.dto.ExpenseSummaryRequest;
 import org.example.cardfit.recommendation.policy.CategorySelectionPolicy;
 import org.example.cardfit.recommendation.policy.ScorePolicy;
@@ -25,10 +26,10 @@ public class RecommendationService {
     private static final int TOP_COUNT = 3;
 
     private static final Comparator<CardRecommendation> RECOMMENDATION_COMPARATOR = Comparator
-                    .comparingLong(CardRecommendation::score).reversed()
-                    .thenComparing(Comparator.comparingLong(CardRecommendation::benefitAmount).reversed())
-                    .thenComparingInt(r -> r.card().getAnnualFee() != null ? r.card().getAnnualFee() : 0)
-                    .thenComparing(r -> r.card().getCardType() == CardType.CHECK ? 0 : 1);
+            .comparingLong(CardRecommendation::score).reversed()
+            .thenComparing(Comparator.comparingLong(CardRecommendation::benefitAmount).reversed())
+            .thenComparingInt(r -> r.card().getAnnualFee() != null ? r.card().getAnnualFee() : 0)
+            .thenComparing(r -> r.card().getCardType() == CardType.CHECK ? 0 : 1);
 
 
     public List<CardRecommendation> recommend(List<ExpenseSummaryRequest> expenses, Long userPerformance) {
@@ -77,6 +78,4 @@ public class RecommendationService {
                 .mapToLong(expense -> benefitCalculationService.calculateBenefit(benefit, expense))
                 .sum();
     }
-
-    public record CardRecommendation(Card card, long benefitAmount, long score){}
 }

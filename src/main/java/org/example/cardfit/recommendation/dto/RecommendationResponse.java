@@ -4,6 +4,8 @@ import java.util.List;
 
 public record RecommendationResponse(
         String cardName,
+        String issuer,
+        String cardImageUrl,
         Integer expectedBenefitAmount,
         List<BenefitDetail> benefitDetails,
         String explanation,

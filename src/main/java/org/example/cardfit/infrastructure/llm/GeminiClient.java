@@ -114,6 +114,11 @@ public class GeminiClient implements LLMClient {
         return parseColumnMapping(jsonText);
     }
 
+    @Override
+    public String generateExplanation(String prompt) {
+        return callGeminiApi(prompt);
+    }
+
     private String createHeaderDetectPrompt(List<String> headers) {
         String headerList = String.join(",", headers);
 
