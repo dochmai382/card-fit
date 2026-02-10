@@ -7,6 +7,7 @@ import org.example.cardfit.domain.card.CardRepository;
 import org.example.cardfit.domain.card.CardStatus;
 import org.example.cardfit.domain.card.CardType;
 import org.example.cardfit.domain.category.Category;
+import org.example.cardfit.recommendation.dto.BenefitDetail;
 import org.example.cardfit.recommendation.dto.ExpenseSummaryRequest;
 import org.example.cardfit.recommendation.policy.CategorySelectionPolicy;
 import org.example.cardfit.recommendation.policy.ScorePolicy;
@@ -192,6 +193,50 @@ class RecommendationServiceTest {
         assertThat(results.get(0).card().getName()).isEqualTo("카드C");
         assertThat(results.get(1).card().getName()).isEqualTo("카드B");
         assertThat(results.get(2).card().getName()).isEqualTo("카드A");
+    }
+
+    @Test
+    @DisplayName("카테고리별 상세 혜택 계산")
+    void
+    calculateBenefitDetails_returnsDetailsByCategory() {
+        // given
+        Category category = createCategory(1L);
+        Card card = createCard(null, null, List.of(
+                createBenefit(category, DiscountType.RATE, 10.0, null, 1)
+        ));
+        List<ExpenseSummaryRequest> expenses = List.of(
+                new ExpenseSummaryRequest(1L, 100000L)
+        );
+
+        // when
+        List<BenefitDetail> details = recommendationService.calculateBenefitDetails(card, expenses);
+
+        // then
+        assertThat(details).hasSize(1);
+        assertThat(details.get(0).categoryName()).isEqualTo("커피/카페");
+        assertThat(details.get(0).discountAmount()).isEqualTo(10000);
+    }
+
+    @Test
+    @DisplayName("할인 0원인 카테고리는 제외")
+    void calculateBenefitDetails_excludesZeroDiscount() {
+        // given
+        Category category1 = createCategory(1L);
+        Card card = createCard(null, null, List.of(
+                createBenefit(category1, DiscountType.RATE, 10.0, null, 1)
+        ));
+        // 카테고리 2는 혜택 없음 -> 0원
+        List<ExpenseSummaryRequest> expenses = List.of(
+                new ExpenseSummaryRequest(1L, 100000L),
+                new ExpenseSummaryRequest(2L, 50000L)
+        );
+
+        // when
+        List<BenefitDetail> details = recommendationService.calculateBenefitDetails(card, expenses);
+
+        // then
+        assertThat(details).hasSize(1);  // 0원인 카테고리2 제외
+        assertThat(details.get(0).categoryName()).isEqualTo("커피/카페");
     }
 
     private Category createCategory(long id) {

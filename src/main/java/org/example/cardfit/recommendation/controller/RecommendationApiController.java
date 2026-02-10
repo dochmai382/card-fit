@@ -1,10 +1,7 @@
 package org.example.cardfit.recommendation.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.cardfit.recommendation.dto.CardRecommendation;
-import org.example.cardfit.recommendation.dto.ExpenseMappingResult;
-import org.example.cardfit.recommendation.dto.ExpenseSummaryRequest;
-import org.example.cardfit.recommendation.dto.RecommendationResponse;
+import org.example.cardfit.recommendation.dto.*;
 import org.example.cardfit.recommendation.form.ExcelUploadForm;
 import org.example.cardfit.recommendation.form.ManualInputForm;
 import org.example.cardfit.recommendation.service.ExpenseParseService;
@@ -48,13 +45,14 @@ public class RecommendationApiController {
 
     private RecommendationResponse toResponse(CardRecommendation rec, List<ExpenseSummaryRequest> expenses) {
         String explanation = llmExplanationService.generateExplanation(rec, expenses);
+        List<BenefitDetail> benefitDetails = recommendationService.calculateBenefitDetails(rec.card(), expenses);
 
         return new RecommendationResponse(
                 rec.card().getName(),
                 rec.card().getIssuer(),
                 rec.card().getCardImageUrl(),
                 rec.benefitAmount(),
-                List.of(), // TODO: benefitDetails 조립
+                benefitDetails,
                 explanation,
                 rec.card().getAnnualFee()
         );

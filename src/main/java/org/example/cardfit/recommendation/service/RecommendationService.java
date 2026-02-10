@@ -6,12 +6,15 @@ import org.example.cardfit.domain.card.Card;
 import org.example.cardfit.domain.card.CardRepository;
 import org.example.cardfit.domain.card.CardStatus;
 import org.example.cardfit.domain.card.CardType;
+import org.example.cardfit.domain.category.CategoryType;
+import org.example.cardfit.recommendation.dto.BenefitDetail;
 import org.example.cardfit.recommendation.dto.CardRecommendation;
 import org.example.cardfit.recommendation.dto.ExpenseSummaryRequest;
 import org.example.cardfit.recommendation.policy.CategorySelectionPolicy;
 import org.example.cardfit.recommendation.policy.ScorePolicy;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
@@ -77,5 +80,22 @@ public class RecommendationService {
         return expenses.stream()
                 .mapToLong(expense -> benefitCalculationService.calculateBenefit(benefit, expense))
                 .sum();
+    }
+
+    public List<BenefitDetail> calculateBenefitDetails(Card card, List<ExpenseSummaryRequest> expenses) {
+        return expenses.stream()
+                .map(expense -> {
+                    long discount = card.getBenefits().stream()
+                            .mapToLong(benefit -> benefitCalculationService.calculateBenefit(benefit, expense))
+                            .sum();
+                    String categoryName = Arrays.stream(CategoryType.values())
+                            .filter(c -> c.getId().equals(expense.categoryId()))
+                            .findFirst()
+                            .map(CategoryType::getName)
+                            .orElse("기타");
+                    return new BenefitDetail(categoryName, (int) discount);
+                })
+                .filter(detail -> detail.discountAmount() > 0)
+                .toList();
     }
 }

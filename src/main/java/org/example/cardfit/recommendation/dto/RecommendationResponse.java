@@ -11,8 +11,4 @@ public record RecommendationResponse(
         String explanation,
         Integer annualFee
 ) {
-    public record BenefitDetail(
-            String categoryName,
-            Integer discountAmount
-    ){}
 }
