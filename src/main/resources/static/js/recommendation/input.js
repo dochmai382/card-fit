@@ -134,6 +134,7 @@ document.getElementById('mainForm').addEventListener('submit', async function(e)
     e.preventDefault();
 
     const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
     submitBtn.disabled = true;
     submitBtn.textContent = '분석 중...';
 
@@ -142,14 +143,16 @@ document.getElementById('mainForm').addEventListener('submit', async function(e)
         this.querySelectorAll('.category-input').forEach(input => {
             const hiddenInput = input.previousElementSibling;
             if (hiddenInput && input.value) {
-                items.push({
-                    categoryId: Number(hiddenInput.value),
-                    amount: Number(unformatNumber(input.value))
-                });
+                const categoryId = Number(hiddenInput.value);
+                const amount = Number(unformatNumber(input.value));
+
+                if (!isNaN(categoryId) && !isNaN(amount) && amount > 0) {
+                    items.push({categoryId, amount});
+                }
             }
         });
 
-        const expectedPerformance = Number(unformatNumber(document.getElementById('expectedPerformance').value));
+        const expectedPerformance = Number(unformatNumber(document.getElementById('expectedPerformance').value)) || 0;
 
         const response = await fetch('/api/recommendation/recommend', {
             method: 'POST',
@@ -168,7 +171,7 @@ document.getElementById('mainForm').addEventListener('submit', async function(e)
     } catch (error) {
         alert(error.message || '오류가 발생했습니다.');
         submitBtn.disabled = false;
-        submitBtn.textContent = '추천 카드 분석';
+        submitBtn.textContent = originalText;
     }
 });
 

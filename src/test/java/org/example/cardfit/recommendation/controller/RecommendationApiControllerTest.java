@@ -9,6 +9,7 @@ import org.example.cardfit.recommendation.service.RecommendationService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -18,11 +19,13 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RecommendationApiController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class RecommendationApiControllerTest {
 
     @Autowired
@@ -58,16 +61,17 @@ class RecommendationApiControllerTest {
                 {
                     "items": [
                         {"categoryId": 1, "amount": 100000},
-                        {"categoryId": 2, "amount": 200000},
+                        {"categoryId": 2, "amount": 200000}
                     ],
                     "expectedPerformance": 300000
                 }
                 """;
 
         // when & then
-        mockMvc.perform(post("api/recommendation/recommend")
+        mockMvc.perform(post("/api/recommendation/recommend")
+                        .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .contentType(requestBody))
+                        .content(requestBody))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].cardName").value("테스트 카드"))
                 .andExpect(jsonPath("$[0].issuer").value("테스트은행"))

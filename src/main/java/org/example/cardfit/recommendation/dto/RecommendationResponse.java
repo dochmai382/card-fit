@@ -6,7 +6,7 @@ public record RecommendationResponse(
         String cardName,
         String issuer,
         String cardImageUrl,
-        Integer expectedBenefitAmount,
+        Long expectedBenefitAmount,
         List<BenefitDetail> benefitDetails,
         String explanation,
         Integer annualFee

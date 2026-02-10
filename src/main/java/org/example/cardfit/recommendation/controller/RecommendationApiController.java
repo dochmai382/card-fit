@@ -53,7 +53,7 @@ public class RecommendationApiController {
                 rec.card().getName(),
                 rec.card().getIssuer(),
                 rec.card().getCardImageUrl(),
-                (int) rec.benefitAmount(),
+                rec.benefitAmount(),
                 List.of(), // TODO: benefitDetails 조립
                 explanation,
                 rec.card().getAnnualFee()

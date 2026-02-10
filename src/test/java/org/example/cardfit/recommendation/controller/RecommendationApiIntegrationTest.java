@@ -85,6 +85,8 @@ class RecommendationApiIntegrationTest {
     @DisplayName("추천 API - 빈 지출 내역")
     void recommend_withEmptyExpenses() throws Exception {
         // given
+        given(llmClient.generateExplanation(anyString())).willReturn("추천 사유");
+
         String requestBody = """
                 {
                     "items": [],

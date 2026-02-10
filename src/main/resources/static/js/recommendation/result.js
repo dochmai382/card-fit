@@ -1,7 +1,7 @@
 const DEFAULT_CARD_IMAGE = 'data:image/svg+xml,' +
     encodeURIComponent(`
     <svg xmlns="http://www.w3.org/2000/svg" width="120" height="76" viewBox="0 0 120 76">
-        <rect fill="$e0e0e0" width="120" height="76" rx="8"/>
+        <rect fill="#e0e0e0" width="120" height="76" rx="8"/>
         <text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="#999" font-size="12">No Image</text>
     </svg>
     `);
@@ -16,7 +16,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    const recommendations = JSON.parse(data);
+    let recommendations;
+    try {
+        recommendations = JSON.parse(data);
+    } catch (e) {
+        showError('데이터를 불러오는 중 오류가 발생했습니다.');
+        return;
+    }
     sessionStorage.removeItem('recommendations');
 
     if (recommendations.length === 0) {
@@ -67,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const benefit = document.createElement('div');
         benefit.className = 'benefit-amount my-2';
-        benefit.textContent = `월 약 ${rec.expectedBenefitAmount.toLocaleString()}원 혜택`;
+        benefit.textContent = `월 약 ${(rec.expectedBenefitAmount || 0).toLocaleString()}원 혜택`;
 
         const annualFee = document.createElement('div');
         annualFee.className = 'text-muted small';
