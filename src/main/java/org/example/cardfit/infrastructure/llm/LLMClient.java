@@ -8,4 +8,6 @@ public interface LLMClient {
     String classify(List<String> storeNames);
 
     ColumnMapping detectColumns(List<String> headers);
+
+    String generateExplanation(String prompt);
 }

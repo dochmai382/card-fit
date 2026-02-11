@@ -6,13 +6,15 @@ import org.example.cardfit.domain.card.Card;
 import org.example.cardfit.domain.card.CardRepository;
 import org.example.cardfit.domain.card.CardStatus;
 import org.example.cardfit.domain.card.CardType;
+import org.example.cardfit.domain.category.CategoryType;
+import org.example.cardfit.recommendation.dto.BenefitDetail;
+import org.example.cardfit.recommendation.dto.CardRecommendation;
 import org.example.cardfit.recommendation.dto.ExpenseSummaryRequest;
 import org.example.cardfit.recommendation.policy.CategorySelectionPolicy;
 import org.example.cardfit.recommendation.policy.ScorePolicy;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,10 +27,10 @@ public class RecommendationService {
     private static final int TOP_COUNT = 3;
 
     private static final Comparator<CardRecommendation> RECOMMENDATION_COMPARATOR = Comparator
-                    .comparingLong(CardRecommendation::score).reversed()
-                    .thenComparing(Comparator.comparingLong(CardRecommendation::benefitAmount).reversed())
-                    .thenComparingInt(r -> r.card().getAnnualFee() != null ? r.card().getAnnualFee() : 0)
-                    .thenComparing(r -> r.card().getCardType() == CardType.CHECK ? 0 : 1);
+            .comparingLong(CardRecommendation::score).reversed()
+            .thenComparing(Comparator.comparingLong(CardRecommendation::benefitAmount).reversed())
+            .thenComparingInt(r -> r.card().getAnnualFee() != null ? r.card().getAnnualFee() : 0)
+            .thenComparing(r -> r.card().getCardType() == CardType.CHECK ? 0 : 1);
 
 
     public List<CardRecommendation> recommend(List<ExpenseSummaryRequest> expenses, Long userPerformance) {
@@ -57,26 +59,37 @@ public class RecommendationService {
                 .toList();
 
         long totalBenefit = 0;
+        Map<Long, Long> categoryBenefits = new HashMap<>();
+
         for (Benefit benefit : sortedBenefits) {
             if (remainingLimit <= 0) break;
 
-            long benefitAmount = calculateBenefitForAllExpenses(benefit, expenses);
+            for (ExpenseSummaryRequest expense : expenses) {
+                if (remainingLimit <= 0) break;
 
-            long appliedAmount = Math.min(benefitAmount, remainingLimit);
-            totalBenefit += appliedAmount;
-            remainingLimit -= appliedAmount;
+                long benefitAmount = benefitCalculationService.calculateBenefit(benefit, expense);
+                long appliedAmount = Math.min(benefitAmount, remainingLimit);
+                totalBenefit += appliedAmount;
+                remainingLimit -= appliedAmount;
+
+                categoryBenefits.merge(expense.categoryId(), appliedAmount, Long::sum);
+            }
         }
+
+        List<BenefitDetail> benefitDetails = categoryBenefits.entrySet().stream()
+                .filter(e -> e.getValue() > 0)
+                .map(e -> {
+                    String categoryName = Arrays.stream(CategoryType.values())
+                            .filter(c -> c.getId().equals(e.getKey()))
+                            .findFirst()
+                            .map(CategoryType::getName)
+                            .orElse("기타");
+                    return new BenefitDetail(categoryName, e.getValue());
+                })
+                .toList();
 
         long score = scorePolicy.calculateScore(card, totalBenefit, topCategories);
 
-        return new CardRecommendation(card, totalBenefit, score);
+        return new CardRecommendation(card, totalBenefit, score, benefitDetails);
     }
-
-    private long calculateBenefitForAllExpenses(Benefit benefit, List<ExpenseSummaryRequest> expenses) {
-        return expenses.stream()
-                .mapToLong(expense -> benefitCalculationService.calculateBenefit(benefit, expense))
-                .sum();
-    }
-
-    public record CardRecommendation(Card card, long benefitAmount, long score){}
 }

@@ -7,6 +7,7 @@ import org.example.cardfit.domain.card.CardRepository;
 import org.example.cardfit.domain.card.CardStatus;
 import org.example.cardfit.domain.card.CardType;
 import org.example.cardfit.domain.category.Category;
+import org.example.cardfit.recommendation.dto.BenefitDetail;
 import org.example.cardfit.recommendation.dto.ExpenseSummaryRequest;
 import org.example.cardfit.recommendation.policy.CategorySelectionPolicy;
 import org.example.cardfit.recommendation.policy.ScorePolicy;
@@ -192,6 +193,62 @@ class RecommendationServiceTest {
         assertThat(results.get(0).card().getName()).isEqualTo("카드C");
         assertThat(results.get(1).card().getName()).isEqualTo("카드B");
         assertThat(results.get(2).card().getName()).isEqualTo("카드A");
+    }
+
+    @Test
+    @DisplayName("추천 결과에 카테고리별 상세 혜택이 포함된다")
+    void recommend_includesBenefitDetails() {
+        // given
+        Category category = createCategory(1L);
+        Card card = createCard(null, null, List.of(
+                createBenefit(category, DiscountType.RATE, 10.0, null, 1)
+        ));
+        when(cardRepository.findByStatus(CardStatus.ACTIVE)).thenReturn(List.of(card));
+
+
+        List<ExpenseSummaryRequest> expenses = List.of(
+                new ExpenseSummaryRequest(1L, 100000L)
+        );
+
+        // when
+        var results = recommendationService.recommend(expenses, 500000L);
+
+        // then
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).benefitDetails()).hasSize(1);
+        assertThat(results.get(0).benefitDetails().get(0).categoryName()).isEqualTo("커피/카페");
+        assertThat(results.get(0).benefitDetails().get(0).discountAmount()).isEqualTo(10000);
+    }
+
+    @Test
+    @DisplayName("상세 혜택에 통합 한도가 적용된다")
+    void recommend_benefitDetailsRespectsLimit() {
+        // given
+        Category category1 = createCategory(1L);
+        Category category2 = createCategory(2L);
+
+        Card card = createCard(15000, null, List.of(
+                createBenefit(category1, DiscountType.RATE, 10.0, null, 1),
+                createBenefit(category2, DiscountType.RATE, 10.0, null, 2)
+        ));
+        when(cardRepository.findByStatus(CardStatus.ACTIVE)).thenReturn(List.of(card));
+
+        // 각 10만원씩 -> 10% = 각 1만원 -> 총 2만원 but 한도 1.5만
+        List<ExpenseSummaryRequest> expenses = List.of(
+                new ExpenseSummaryRequest(1L, 100000L),
+                new ExpenseSummaryRequest(2L, 100000L)
+        );
+
+        // when
+        var results = recommendationService.recommend(expenses, 500000L);
+
+        // then
+        assertThat(results.get(0).benefitAmount()).isEqualTo(15000);
+
+        long totalDetails = results.get(0).benefitDetails().stream()
+                .mapToLong(BenefitDetail::discountAmount)
+                .sum();
+        assertThat(totalDetails).isEqualTo(15000);
     }
 
     private Category createCategory(long id) {

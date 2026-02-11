@@ -30,17 +30,26 @@ public class GeminiClient implements LLMClient {
         this.objectMapper = objectMapper;
     }
 
-    private String callGeminiApi(String prompt) {
+    private String  callGeminiApi(String prompt, boolean requireJsonResponse) {
         String urlWithKey = apiUrl + "?key=" + apiKey;
 
-        Map<String, Object> requestBody = Map.of(
-                "contents", List.of(
-                        Map.of("parts", List.of(Map.of("text", prompt)))
-                ),
-                "generationConfig", Map.of(
-                        "response_mime_type", "application/json"
-                )
-        );
+        Map<String, Object> requestBody;
+        if (requireJsonResponse) {
+            requestBody = Map.of(
+                    "contents", List.of(
+                            Map.of("parts", List.of(Map.of("text", prompt)))
+                    ),
+                    "generationConfig", Map.of(
+                            "response_mime_type", "application/json"
+                    )
+            );
+        } else {
+            requestBody = Map.of(
+                    "contents", List.of(
+                            Map.of("parts", List.of(Map.of("text", prompt)))
+                    )
+            );
+        }
         String rawResponse = restClient.post()
                 .uri(urlWithKey)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -55,7 +64,7 @@ public class GeminiClient implements LLMClient {
     @Override
     public String classify(List<String> storeNames) {
         String prompt = createPrompt(storeNames);
-        return callGeminiApi(prompt);
+        return callGeminiApi(prompt, true);
     }
 
     private String extractTextFromResponse(String rawResponse) {
@@ -110,8 +119,13 @@ public class GeminiClient implements LLMClient {
     @Override
     public ColumnMapping detectColumns(List<String> headers) {
         String prompt = createHeaderDetectPrompt(headers);
-        String jsonText = callGeminiApi(prompt);
+        String jsonText = callGeminiApi(prompt, true);
         return parseColumnMapping(jsonText);
+    }
+
+    @Override
+    public String generateExplanation(String prompt) {
+        return callGeminiApi(prompt, false);
     }
 
     private String createHeaderDetectPrompt(List<String> headers) {

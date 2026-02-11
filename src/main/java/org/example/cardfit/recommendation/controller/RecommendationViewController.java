@@ -1,12 +1,9 @@
 package org.example.cardfit.recommendation.controller;
 
 import org.example.cardfit.domain.category.CategoryType;
-import org.example.cardfit.recommendation.form.ManualInputForm;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.Arrays;
@@ -29,8 +26,8 @@ public class RecommendationViewController {
         return "recommendation/input";
     }
 
-    @PostMapping("/result")
-    public String showResult(@ModelAttribute ManualInputForm form, Model model) {
+    @GetMapping("/result")
+    public String showResult() {
         return "recommendation/result";
     }
 }
