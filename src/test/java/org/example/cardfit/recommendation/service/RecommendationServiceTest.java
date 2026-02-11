@@ -196,47 +196,59 @@ class RecommendationServiceTest {
     }
 
     @Test
-    @DisplayName("카테고리별 상세 혜택 계산")
-    void
-    calculateBenefitDetails_returnsDetailsByCategory() {
+    @DisplayName("추천 결과에 카테고리별 상세 혜택이 포함된다")
+    void recommend_includesBenefitDetails() {
         // given
         Category category = createCategory(1L);
         Card card = createCard(null, null, List.of(
                 createBenefit(category, DiscountType.RATE, 10.0, null, 1)
         ));
+        when(cardRepository.findByStatus(CardStatus.ACTIVE)).thenReturn(List.of(card));
+
+
         List<ExpenseSummaryRequest> expenses = List.of(
                 new ExpenseSummaryRequest(1L, 100000L)
         );
 
         // when
-        List<BenefitDetail> details = recommendationService.calculateBenefitDetails(card, expenses);
+        var results = recommendationService.recommend(expenses, 500000L);
 
         // then
-        assertThat(details).hasSize(1);
-        assertThat(details.get(0).categoryName()).isEqualTo("커피/카페");
-        assertThat(details.get(0).discountAmount()).isEqualTo(10000);
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).benefitDetails()).hasSize(1);
+        assertThat(results.get(0).benefitDetails().get(0).categoryName()).isEqualTo("커피/카페");
+        assertThat(results.get(0).benefitDetails().get(0).discountAmount()).isEqualTo(10000);
     }
 
     @Test
-    @DisplayName("할인 0원인 카테고리는 제외")
-    void calculateBenefitDetails_excludesZeroDiscount() {
+    @DisplayName("상세 혜택에 통합 한도가 적용된다")
+    void recommend_benefitDetailsRespectsLimit() {
         // given
         Category category1 = createCategory(1L);
-        Card card = createCard(null, null, List.of(
-                createBenefit(category1, DiscountType.RATE, 10.0, null, 1)
+        Category category2 = createCategory(2L);
+
+        Card card = createCard(15000, null, List.of(
+                createBenefit(category1, DiscountType.RATE, 10.0, null, 1),
+                createBenefit(category2, DiscountType.RATE, 10.0, null, 2)
         ));
-        // 카테고리 2는 혜택 없음 -> 0원
+        when(cardRepository.findByStatus(CardStatus.ACTIVE)).thenReturn(List.of(card));
+
+        // 각 10만원씩 -> 10% = 각 1만원 -> 총 2만원 but 한도 1.5만
         List<ExpenseSummaryRequest> expenses = List.of(
                 new ExpenseSummaryRequest(1L, 100000L),
-                new ExpenseSummaryRequest(2L, 50000L)
+                new ExpenseSummaryRequest(2L, 100000L)
         );
 
         // when
-        List<BenefitDetail> details = recommendationService.calculateBenefitDetails(card, expenses);
+        var results = recommendationService.recommend(expenses, 500000L);
 
         // then
-        assertThat(details).hasSize(1);  // 0원인 카테고리2 제외
-        assertThat(details.get(0).categoryName()).isEqualTo("커피/카페");
+        assertThat(results.get(0).benefitAmount()).isEqualTo(15000);
+
+        long totalDetails = results.get(0).benefitDetails().stream()
+                .mapToLong(BenefitDetail::discountAmount)
+                .sum();
+        assertThat(totalDetails).isEqualTo(15000);
     }
 
     private Category createCategory(long id) {

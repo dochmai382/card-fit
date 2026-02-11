@@ -42,7 +42,7 @@ class LlmExplanationServiceTest {
                 .annualFee(15000)
                 .build();
 
-        CardRecommendation recommendation = new CardRecommendation(card, 10000L, 100L);
+        CardRecommendation recommendation = new CardRecommendation(card, 10000L, 100L, List.of());
 
         List<ExpenseSummaryRequest> expenses = List.of(
                 new ExpenseSummaryRequest(1L, 100000L),
@@ -70,7 +70,7 @@ class LlmExplanationServiceTest {
                 .annualFee(15000)
                 .build();
 
-        CardRecommendation recommendation = new CardRecommendation(card, 10000L, 100L);
+        CardRecommendation recommendation = new CardRecommendation(card, 10000L, 100L, List.of());
 
         List<ExpenseSummaryRequest> expenses = List.of(
                 new ExpenseSummaryRequest(1L, 100000L)

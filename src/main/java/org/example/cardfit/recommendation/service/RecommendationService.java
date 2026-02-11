@@ -14,9 +14,7 @@ import org.example.cardfit.recommendation.policy.CategorySelectionPolicy;
 import org.example.cardfit.recommendation.policy.ScorePolicy;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -61,41 +59,37 @@ public class RecommendationService {
                 .toList();
 
         long totalBenefit = 0;
+        Map<Long, Long> categoryBenefits = new HashMap<>();
+
         for (Benefit benefit : sortedBenefits) {
             if (remainingLimit <= 0) break;
 
-            long benefitAmount = calculateBenefitForAllExpenses(benefit, expenses);
+            for (ExpenseSummaryRequest expense : expenses) {
+                if (remainingLimit <= 0) break;
 
-            long appliedAmount = Math.min(benefitAmount, remainingLimit);
-            totalBenefit += appliedAmount;
-            remainingLimit -= appliedAmount;
+                long benefitAmount = benefitCalculationService.calculateBenefit(benefit, expense);
+                long appliedAmount = Math.min(benefitAmount, remainingLimit);
+                totalBenefit += appliedAmount;
+                remainingLimit -= appliedAmount;
+
+                categoryBenefits.merge(expense.categoryId(), appliedAmount, Long::sum);
+            }
         }
 
-        long score = scorePolicy.calculateScore(card, totalBenefit, topCategories);
-
-        return new CardRecommendation(card, totalBenefit, score);
-    }
-
-    private long calculateBenefitForAllExpenses(Benefit benefit, List<ExpenseSummaryRequest> expenses) {
-        return expenses.stream()
-                .mapToLong(expense -> benefitCalculationService.calculateBenefit(benefit, expense))
-                .sum();
-    }
-
-    public List<BenefitDetail> calculateBenefitDetails(Card card, List<ExpenseSummaryRequest> expenses) {
-        return expenses.stream()
-                .map(expense -> {
-                    long discount = card.getBenefits().stream()
-                            .mapToLong(benefit -> benefitCalculationService.calculateBenefit(benefit, expense))
-                            .sum();
+        List<BenefitDetail> benefitDetails = categoryBenefits.entrySet().stream()
+                .filter(e -> e.getValue() > 0)
+                .map(e -> {
                     String categoryName = Arrays.stream(CategoryType.values())
-                            .filter(c -> c.getId().equals(expense.categoryId()))
+                            .filter(c -> c.getId().equals(e.getKey()))
                             .findFirst()
                             .map(CategoryType::getName)
                             .orElse("기타");
-                    return new BenefitDetail(categoryName, (int) discount);
+                    return new BenefitDetail(categoryName, e.getValue());
                 })
-                .filter(detail -> detail.discountAmount() > 0)
                 .toList();
+
+        long score = scorePolicy.calculateScore(card, totalBenefit, topCategories);
+
+        return new CardRecommendation(card, totalBenefit, score, benefitDetails);
     }
 }

@@ -1,7 +1,10 @@
 package org.example.cardfit.recommendation.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.example.cardfit.recommendation.dto.*;
+import org.example.cardfit.recommendation.dto.CardRecommendation;
+import org.example.cardfit.recommendation.dto.ExpenseMappingResult;
+import org.example.cardfit.recommendation.dto.ExpenseSummaryRequest;
+import org.example.cardfit.recommendation.dto.RecommendationResponse;
 import org.example.cardfit.recommendation.form.ExcelUploadForm;
 import org.example.cardfit.recommendation.form.ManualInputForm;
 import org.example.cardfit.recommendation.service.ExpenseParseService;
@@ -29,7 +32,9 @@ public class RecommendationApiController {
 
     @PostMapping("/recommend")
     public ResponseEntity<List<RecommendationResponse>> recommend(@RequestBody ManualInputForm form) {
-        List<ExpenseSummaryRequest> expenses = form.items().stream()
+        List<ExpenseSummaryRequest> expenses = form.items() == null
+                ? List.of()
+                : form.items().stream()
                 .filter(item -> item.amount() != null && item.amount() > 0)
                 .map(item -> new ExpenseSummaryRequest(item.categoryId(), item.amount()))
                 .toList();
@@ -45,14 +50,13 @@ public class RecommendationApiController {
 
     private RecommendationResponse toResponse(CardRecommendation rec, List<ExpenseSummaryRequest> expenses) {
         String explanation = llmExplanationService.generateExplanation(rec, expenses);
-        List<BenefitDetail> benefitDetails = recommendationService.calculateBenefitDetails(rec.card(), expenses);
 
         return new RecommendationResponse(
                 rec.card().getName(),
                 rec.card().getIssuer(),
                 rec.card().getCardImageUrl(),
                 rec.benefitAmount(),
-                benefitDetails,
+                rec.benefitDetails(),
                 explanation,
                 rec.card().getAnnualFee()
         );

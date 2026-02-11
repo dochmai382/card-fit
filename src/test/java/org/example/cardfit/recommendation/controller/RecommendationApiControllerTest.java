@@ -52,7 +52,7 @@ class RecommendationApiControllerTest {
                 .cardImageUrl("https://example.com/card.png")
                 .build();
 
-        CardRecommendation mockRecommendation = new CardRecommendation(mockCard, 5000L, 100L);
+        CardRecommendation mockRecommendation = new CardRecommendation(mockCard, 5000L, 100L, List.of());
 
         given(recommendationService.recommend(any(), any())).willReturn(List.of(mockRecommendation));
         given(llmExplanationService.generateExplanation(any(), any())).willReturn("이 카드는 커피 할인이 좋습니다.");
