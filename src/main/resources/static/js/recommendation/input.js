@@ -48,7 +48,7 @@ function renderMappingModal() {
         checkbox.type = 'checkbox';
         checkbox.className = 'row-checkbox';
         checkbox.checked = true;
-        checkbox.dataset.index = index;
+        checkbox.addEventListener('change', updateSelectAllState);
         tdCheck.appendChild(checkbox);
         tr.appendChild(tdCheck);
 
@@ -87,6 +87,12 @@ function renderMappingModal() {
     };
 
     document.getElementById('mappingModal').style.display = 'block';
+}
+
+function updateSelectAllState() {
+    const checkboxes = document.querySelectorAll('.row-checkbox');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    document.getElementById('selectAll').checked = allChecked;
 }
 
 function applyToManualForm() {
