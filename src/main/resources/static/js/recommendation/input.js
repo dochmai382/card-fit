@@ -43,6 +43,15 @@ function renderMappingModal() {
     rawAnalysisResults.forEach((item, index) => {
         const tr = document.createElement('tr');
 
+        const tdCheck = document.createElement('td');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'row-checkbox';
+        checkbox.checked = true;
+        checkbox.dataset.index = index;
+        tdCheck.appendChild(checkbox);
+        tr.appendChild(tdCheck);
+
         const tdStore = document.createElement('td');
         tdStore.textContent = item.storeName;
         tr.appendChild(tdStore);
@@ -69,6 +78,14 @@ function renderMappingModal() {
         body.appendChild(tr);
     });
 
+    const selectAll = document.getElementById('selectAll');
+    selectAll.checked = true;
+    selectAll.onchange = function() {
+        document.querySelectorAll('.row-checkbox').forEach(cb => {
+            cb.checked = this.checked;
+        });
+    };
+
     document.getElementById('mappingModal').style.display = 'block';
 }
 
@@ -78,11 +95,15 @@ function applyToManualForm() {
     })
     document.getElementById('expectedPerformance').value = formatNumber(0);
 
-    const selects = document.querySelectorAll('.mapping-select');
+    const rows = document.querySelectorAll('#mappingTableBody tr');
     const totals = {};
     let totalPerformance = 0;
 
-    selects.forEach(select => {
+    rows.forEach(row => {
+        const checkbox = row.querySelector('.row-checkbox');
+        if (!checkbox.checked) return;
+
+        const select = row.querySelector('.mapping-select');
         const catId = select.value;
         const amount = Number(select.dataset.amount);
         if (Number.isNaN(amount)) return;
@@ -97,7 +118,7 @@ function applyToManualForm() {
     }
     document.getElementById('expectedPerformance').value = formatNumber(totalPerformance);
 
-    alert('데이터가 합산되어 반영되었습니다');
+    alert('선택된 항목이 합산되어 반영되었습니다');
     closeModal();
 }
 
