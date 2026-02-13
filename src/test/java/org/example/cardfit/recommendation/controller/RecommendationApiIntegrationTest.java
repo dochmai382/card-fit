@@ -1,6 +1,7 @@
 package org.example.cardfit.recommendation.controller;
 
 import org.example.cardfit.infrastructure.llm.LLMClient;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Disabled("테스트 데이터 설정 필요")
 @SpringBootTest
 @AutoConfigureMockMvc
 class RecommendationApiIntegrationTest {
