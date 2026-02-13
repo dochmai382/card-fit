@@ -1,6 +1,8 @@
 package org.example.cardfit.infrastructure.llm;
 
 import org.example.cardfit.domain.category.CategoryType;
+import org.example.cardfit.global.error.BusinessException;
+import org.example.cardfit.global.error.ErrorCode;
 import org.example.cardfit.infrastructure.excel.ColumnMapping;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -81,7 +83,7 @@ public class GeminiClient implements LLMClient {
 
             return "";
         } catch (Exception e) {
-            throw new RuntimeException("Gemini API 응답 파싱 실패");
+            throw new BusinessException(ErrorCode.LLM_RESPONSE_PARSE_ERROR);
         }
     }
 
@@ -164,7 +166,7 @@ public class GeminiClient implements LLMClient {
 
             return new ColumnMapping(dateIndex, storeNameIndex, amountIndex, typeIndex);
         } catch (Exception e) {
-            throw new RuntimeException("헤더 감지 응답 파싱 실패: " + e.getMessage());
+            throw new BusinessException(ErrorCode.LLM_RESPONSE_PARSE_ERROR);
         }
     }
 }

@@ -1,6 +1,8 @@
 package org.example.cardfit.recommendation.service;
 
 import lombok.RequiredArgsConstructor;
+import org.example.cardfit.global.error.BusinessException;
+import org.example.cardfit.global.error.ErrorCode;
 import org.example.cardfit.infrastructure.excel.PoiExcelParser;
 import org.example.cardfit.infrastructure.llm.LLMClient;
 import org.example.cardfit.recommendation.dto.ExpenseMappingResult;
@@ -46,14 +48,14 @@ public class ExpenseParseService {
     }
 
     private void validateFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) throw new IllegalArgumentException("파일이 비어있습니다");
+        if (file == null || file.isEmpty()) throw new BusinessException(ErrorCode.FILE_EMPTY);
 
         String filename = file.getOriginalFilename();
-        if (filename == null) throw new IllegalArgumentException("파일명이 없습니다.");
+        if (filename == null) throw new BusinessException(ErrorCode.FILE_NAME_MISSING);
 
         String lower = filename.toLowerCase();
         if (!lower.endsWith(".xlsx") && !lower.endsWith(".xls"))
-            throw new IllegalArgumentException("엑셀 파일(.xlsx, .xls)만 업로드 가능합니다.");
+            throw new BusinessException(ErrorCode.INVALID_FILE_TYPE);
     }
 
     private Map<String, Long> classifyStores(List<String> stores) {

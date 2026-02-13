@@ -2,6 +2,8 @@ package org.example.cardfit.infrastructure.excel;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
+import org.example.cardfit.global.error.BusinessException;
+import org.example.cardfit.global.error.ErrorCode;
 import org.example.cardfit.recommendation.dto.RawExpense;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +29,7 @@ public class PoiExcelParser implements ExcelParser{
             Sheet sheet = workbook.getSheetAt(0);
 
             Row headerRow = sheet.getRow(0);
-            if (headerRow == null) throw new RuntimeException("엑셀 파일에 헤더 행이 없습니다");
+            if (headerRow == null) throw new BusinessException(ErrorCode.EXCEL_HEADER_MISSING);
 
             List<String> headers = extractHeaders(headerRow);
 
@@ -56,7 +58,7 @@ public class PoiExcelParser implements ExcelParser{
             return expenses;
 
         } catch (Exception e) {
-            throw new RuntimeException("엑셀 파일 파싱 중 오류가 발생했습니다: " + e.getMessage());
+            throw new BusinessException(ErrorCode.EXCEL_PARSE_ERROR);
         }
     }
 

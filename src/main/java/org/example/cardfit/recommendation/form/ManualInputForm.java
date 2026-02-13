@@ -1,11 +1,13 @@
 package org.example.cardfit.recommendation.form;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
 public record ManualInputForm(
+        @Valid
         List<ManualItem> items,
 
         @Min(value = 0, message = "예상 실적은 0 이상이어야 합니다")
