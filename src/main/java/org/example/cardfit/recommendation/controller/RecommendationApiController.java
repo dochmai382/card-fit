@@ -1,5 +1,6 @@
 package org.example.cardfit.recommendation.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.cardfit.recommendation.dto.CardRecommendation;
 import org.example.cardfit.recommendation.dto.ExpenseMappingResult;
@@ -25,13 +26,13 @@ public class RecommendationApiController {
     private final LlmExplanationService llmExplanationService;
 
     @PostMapping("/upload")
-    public ResponseEntity<List<ExpenseMappingResult>> uploadExcel(@ModelAttribute ExcelUploadForm form) {
+    public ResponseEntity<List<ExpenseMappingResult>> uploadExcel(@Valid @ModelAttribute ExcelUploadForm form) {
         List<ExpenseMappingResult> results = expenseParseService.parseAndClassify(form.file());
         return ResponseEntity.ok(results);
     }
 
     @PostMapping("/recommend")
-    public ResponseEntity<List<RecommendationResponse>> recommend(@RequestBody ManualInputForm form) {
+    public ResponseEntity<List<RecommendationResponse>> recommend(@Valid @RequestBody ManualInputForm form) {
         List<ExpenseSummaryRequest> expenses = form.items() == null
                 ? List.of()
                 : form.items().stream()
