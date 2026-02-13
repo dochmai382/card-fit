@@ -28,9 +28,8 @@ public class ExpenseParseService {
     private final ObjectMapper objectMapper;
 
     public List<ExpenseMappingResult> parseAndClassify(MultipartFile file) {
-        log.info("엑셀 파싱 요청: 파일명 {}", file.getOriginalFilename());
-
         validateFile(file);
+        log.info("엑셀 파싱 요청: 파일명 {}", file.getOriginalFilename());
 
         var rawExpenses = excelParser.parse(file);
 

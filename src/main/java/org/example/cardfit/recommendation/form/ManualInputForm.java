@@ -10,6 +10,7 @@ public record ManualInputForm(
         @Valid
         List<ManualItem> items,
 
+        @NotNull(message = "예상 실적을 입력해주세요")
         @Min(value = 0, message = "예상 실적은 0 이상이어야 합니다")
         Long expectedPerformance
 ) {

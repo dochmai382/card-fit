@@ -40,17 +40,9 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(ErrorCode.FILE_SIZE_EXCEEDED));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.warn("IllegalArgumentException: {}", e.getMessage());
-
-        return ResponseEntity.badRequest()
-                .body(ErrorResponse.of(ErrorCode.INVALID_INPUT));
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        log.warn("서버 오류 발생: {}", e.getMessage(), e);
+        log.error("서버 오류 발생: {}", e.getMessage(), e);
 
         return ResponseEntity.internalServerError()
                 .body(ErrorResponse.of(ErrorCode.SERVER_ERROR));

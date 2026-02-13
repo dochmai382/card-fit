@@ -44,7 +44,7 @@ public class PoiExcelParser implements ExcelParser{
 
                 if (mapping.typeIndex() >= 0) {
                     String type = getStringValue(row.getCell(mapping.typeIndex()));
-                    if(!isExpense(type)) continue;
+                    if (!isExpense(type)) continue;
                 } else {
                     if (rawAmount >= 0) continue;
                 }
@@ -56,7 +56,8 @@ public class PoiExcelParser implements ExcelParser{
                 expenses.add(new RawExpense(date, storeName, amount));
             }
             return expenses;
-
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.EXCEL_PARSE_ERROR);
         }

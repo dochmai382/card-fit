@@ -55,6 +55,7 @@ class GlobalExceptionHandlerTest {
         mockMvc.perform(post("/api/recommendation/recommend")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(form)))
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다"))
                 .andExpect(jsonPath("$.details").isArray());
 
