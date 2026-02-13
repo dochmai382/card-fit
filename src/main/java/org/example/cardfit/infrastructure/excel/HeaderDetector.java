@@ -1,6 +1,8 @@
 package org.example.cardfit.infrastructure.excel;
 
 import lombok.RequiredArgsConstructor;
+import org.example.cardfit.global.error.BusinessException;
+import org.example.cardfit.global.error.ErrorCode;
 import org.example.cardfit.infrastructure.llm.LLMClient;
 import org.springframework.stereotype.Component;
 
@@ -35,7 +37,7 @@ public class HeaderDetector {
 
     private void validateMapping(ColumnMapping mapping) {
         if (mapping.dateIndex() < 0 || mapping.storeNameIndex() < 0 || mapping.amountIndex() < 0) {
-            throw new IllegalArgumentException("필수 열(날짜, 가맹점/내역, 금액)을 찾을 수 없습니다.");
+            throw new BusinessException(ErrorCode.EXCEL_REQUIRED_COLUMNS_MISSING);
         }
     }
 
@@ -53,7 +55,7 @@ public class HeaderDetector {
         try {
             return llmClient.detectColumns(headers);
         } catch (Exception e) {
-            throw new RuntimeException("헤더 자동감지 실패. 지원하지 않는 엑셀 양식입니다.");
+            throw new BusinessException(ErrorCode.EXCEL_UNSUPPORTED_FORMAT);
         }
     }
 }

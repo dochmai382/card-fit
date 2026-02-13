@@ -1,6 +1,7 @@
 package org.example.cardfit.recommendation.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.cardfit.domain.benefit.Benefit;
 import org.example.cardfit.domain.card.Card;
 import org.example.cardfit.domain.card.CardRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RecommendationService {
@@ -34,15 +36,20 @@ public class RecommendationService {
 
 
     public List<CardRecommendation> recommend(List<ExpenseSummaryRequest> expenses, Long userPerformance) {
+        log.info("카드 추천 요청: 카테고리 {}개, 예상실적 {}", expenses.size(), userPerformance);
+
         List<Long> topCategories = categorySelectionPolicy.selectTopCategories(expenses);
         List<Card> activeCards = cardRepository.findByStatus(CardStatus.ACTIVE);
 
-        return activeCards.stream()
+        List<CardRecommendation> result = activeCards.stream()
                 .filter(card -> meetsPerformance(card, userPerformance))
                 .map(card -> calculateCardScore(card, expenses, topCategories))
                 .sorted(RECOMMENDATION_COMPARATOR)
                 .limit(TOP_COUNT)
                 .toList();
+
+        log.info("카드 추천 완료: {}개 추천", result.size());
+        return result;
     }
 
     private boolean meetsPerformance(Card card, Long userPerformance) {

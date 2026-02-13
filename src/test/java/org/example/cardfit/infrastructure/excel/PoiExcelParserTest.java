@@ -1,8 +1,6 @@
 package org.example.cardfit.infrastructure.excel;
 
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.cardfit.recommendation.dto.RawExpense;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,9 +46,16 @@ class PoiExcelParserTest {
         header.createCell(2).setCellValue("금액");
 
         Row dataRow = sheet.createRow(1);
-        dataRow.createCell(0).setCellValue(LocalDate.of(2026, 1, 27));
+        Cell dateCell = dataRow.createCell(0);
+        CellStyle dateStyle = workbook.createCellStyle();
+        CreationHelper creationHelper = workbook.getCreationHelper();
+        dateStyle.setDataFormat(creationHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+        dateCell.setCellStyle(dateStyle);
+        dateCell.setCellValue(java.util.Date.from(LocalDate.of(2026, 1, 27)
+                .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant()));
+
         dataRow.createCell(1).setCellValue("스타벅스 성수점");
-        dataRow.createCell(2).setCellValue(5500);
+        dataRow.createCell(2).setCellValue(-5500);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         workbook.write(bos);

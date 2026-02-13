@@ -1,6 +1,9 @@
 package org.example.cardfit.infrastructure.llm;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.cardfit.domain.category.CategoryType;
+import org.example.cardfit.global.error.BusinessException;
+import org.example.cardfit.global.error.ErrorCode;
 import org.example.cardfit.infrastructure.excel.ColumnMapping;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -13,6 +16,7 @@ import tools.jackson.databind.node.JsonNodeType;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class GeminiClient implements LLMClient {
 
@@ -31,6 +35,8 @@ public class GeminiClient implements LLMClient {
     }
 
     private String  callGeminiApi(String prompt, boolean requireJsonResponse) {
+        log.info("Gemini API 호출 시작");
+
         String urlWithKey = apiUrl + "?key=" + apiKey;
 
         Map<String, Object> requestBody;
@@ -57,6 +63,7 @@ public class GeminiClient implements LLMClient {
                 .retrieve()
                 .body(String.class);
 
+        log.info("Gemini API 응답 수신 완료");
         return extractTextFromResponse(rawResponse);
     }
 
@@ -81,7 +88,7 @@ public class GeminiClient implements LLMClient {
 
             return "";
         } catch (Exception e) {
-            throw new RuntimeException("Gemini API 응답 파싱 실패");
+            throw new BusinessException(ErrorCode.LLM_RESPONSE_PARSE_ERROR);
         }
     }
 
@@ -164,7 +171,7 @@ public class GeminiClient implements LLMClient {
 
             return new ColumnMapping(dateIndex, storeNameIndex, amountIndex, typeIndex);
         } catch (Exception e) {
-            throw new RuntimeException("헤더 감지 응답 파싱 실패: " + e.getMessage());
+            throw new BusinessException(ErrorCode.LLM_RESPONSE_PARSE_ERROR);
         }
     }
 }
