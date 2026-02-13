@@ -1,6 +1,7 @@
 package org.example.cardfit.recommendation.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.cardfit.global.error.BusinessException;
 import org.example.cardfit.global.error.ErrorCode;
 import org.example.cardfit.infrastructure.excel.PoiExcelParser;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ExpenseParseService {
@@ -26,6 +28,8 @@ public class ExpenseParseService {
     private final ObjectMapper objectMapper;
 
     public List<ExpenseMappingResult> parseAndClassify(MultipartFile file) {
+        log.info("엑셀 파싱 요청: 파일명 {}", file.getOriginalFilename());
+
         validateFile(file);
 
         var rawExpenses = excelParser.parse(file);
@@ -37,7 +41,7 @@ public class ExpenseParseService {
 
         Map<String, Long> categoryMap = classifyStores(distinctStores);
 
-        return rawExpenses.stream()
+        List<ExpenseMappingResult> result = rawExpenses.stream()
                 .map(raw -> new ExpenseMappingResult(
                         raw.storeName(),
                         Long.valueOf(raw.amount().toString()),
@@ -45,6 +49,9 @@ public class ExpenseParseService {
                         categoryMap.getOrDefault(raw.storeName(), 0L)
                 ))
                 .toList();
+
+        log.info("엑셀 파싱 완료: {}건 처리", result.size());
+        return result;
     }
 
     private void validateFile(MultipartFile file) {

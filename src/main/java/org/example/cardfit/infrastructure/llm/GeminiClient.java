@@ -1,5 +1,6 @@
 package org.example.cardfit.infrastructure.llm;
 
+import lombok.extern.slf4j.Slf4j;
 import org.example.cardfit.domain.category.CategoryType;
 import org.example.cardfit.global.error.BusinessException;
 import org.example.cardfit.global.error.ErrorCode;
@@ -15,6 +16,7 @@ import tools.jackson.databind.node.JsonNodeType;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class GeminiClient implements LLMClient {
 
@@ -33,6 +35,8 @@ public class GeminiClient implements LLMClient {
     }
 
     private String  callGeminiApi(String prompt, boolean requireJsonResponse) {
+        log.info("Gemini API 호출 시작");
+
         String urlWithKey = apiUrl + "?key=" + apiKey;
 
         Map<String, Object> requestBody;
@@ -59,6 +63,7 @@ public class GeminiClient implements LLMClient {
                 .retrieve()
                 .body(String.class);
 
+        log.info("Gemini API 응답 수신 완료");
         return extractTextFromResponse(rawResponse);
     }
 
